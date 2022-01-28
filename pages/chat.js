@@ -1,21 +1,45 @@
 import { Box, Text, TextField, Image, Button } from '@skynexui/components';
 import React from 'react';
-import appConfig from '../pages/config.json';
+import appConfig from '../config.json';
+import { useRouter } from 'next/router';
 import { createClient } from '@supabase/supabase-js';
+import { ButtonSendSticker } from '../src/components/ButtonSendSticker';
 
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzMwMzAzNSwiZXhwIjoxOTU4ODc5MDM1fQ.DEp5m41rm-eFFalKy_11K7RZiHXe9M8h1xOFJ-lazLs';
 const SUPABASE_URL = 'https://kgndrlhfleggruiexhqp.supabase.co';
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 
-
+function escutaMensagensEmTempoReal (adicionaMensagem) {
+    return supabaseClient
+        .from('mensagens')
+        .on('INSERT', (respostaLive) => {
+            adicionaMensagem(respostaLive.new);
+        })
+        .subscribe();
+}
 
 
 export default function ChatPage() {
 
+    const roteamento = useRouter();
+    const UsuarioLogado = roteamento.query.username;
+    console.log('roteamento.query', roteamento.query)
+    console.log('UsuarioLogado', UsuarioLogado);
 
     const [mensagem, setMensagem] = React.useState('');
-    const [listaDeMensagens, setListaDeMensagens] = React.useState([]);
+    const [listaDeMensagens, setListaDeMensagens] = React.useState([
+       // {
+       //     id:1,
+       //     de: 'omariosouto',
+       //     texto: ':sticker: https://www.alura.com.br/imersao-react-4/assets/figurinhas/Figurinha_11.png',
+       // },
+       // {
+       //     id: 2,
+       //     de: 'peas',
+       //     texto: 'O ternario e meio triste',
+       // },
+    ]);
 
 
     React.useEffect(() => {
@@ -24,8 +48,18 @@ export default function ChatPage() {
             .select('*')
             .order('id', {ascending: false})
             .then(({data}) => {
-                console.log('Dados da consulta:', data);
+                //console.log('Dados da consulta:', data);
                 setListaDeMensagens(data);
+            });
+
+            escutaMensagensEmTempoReal((novaMensagem) => {
+                console.log('Nova mensagem:', novaMensagem);
+                setListaDeMensagens((valorAtualDaLista) => {
+                   return [
+                    novaMensagem,
+                    ...valorAtualDaLista,
+                   ]
+                });
             });
     }, []);
     
@@ -52,7 +86,7 @@ console.log(respostaEsperada);
     function handleNovaMensagem(novaMensagem) {
         const mensagem = {
             //id: listaDeMensagens.length + 1,
-            de: 'vanessametonini',
+            de: UsuarioLogado,
             texto: novaMensagem,
         };
 
@@ -62,15 +96,9 @@ console.log(respostaEsperada);
                 //Tem que ser um objeto com os MESMOS CAMPOS que vc escreveu no supabase
                 mensagem 
             ])
-            .then(({data}) => {
+           .then(({data}) => {
                 console.log('Criando mensagem: ', data);
-                setListaDeMensagens([
-                        data[0],
-                        ...listaDeMensagens,
-                    ]);
-            });
-
-    
+           });    
         setMensagem('');
     }
 
@@ -81,7 +109,7 @@ console.log(respostaEsperada);
                 backgroundColor: appConfig.theme.colors.primary[500],
                 backgroundImage: `url(https://virtualbackgrounds.site/wp-content/uploads/2020/08/the-matrix-digital-rain.jpg)`,
                 backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundBlendMode: 'multiply',
-                color: appConfig.theme.colors.neutrals['000']
+                color: appConfig.theme.colors.neutrals['200']
             }}
         >
             <Box
@@ -151,6 +179,13 @@ console.log(respostaEsperada);
                                 color: appConfig.theme.colors.neutrals[200],
                             }}
                         />
+                        {/* Isso se chama CallBack */}
+                        <ButtonSendSticker
+                            onStickerClick={(sticker) => {
+                                console.log('[USANDO O COMPONENTE] Salva esse sticker no banco', sticker);
+                                handleNovaMensagem(':sticker: ' + sticker);
+                            }}
+                        />
                     </Box>
                 </Box>
             </Box>
@@ -177,7 +212,7 @@ function Header() {
 }
 
 function MessageList(props) {
-    console.log(props);
+    //console.log(props);
     return (
         <Box
             tag="ul"
@@ -233,7 +268,20 @@ function MessageList(props) {
                                 {(new Date().toLocaleDateString())}
                             </Text>
                         </Box>
-                        {mensagem.texto}
+                        {/* [Declarativo] */}
+            {/* Condicional: {mensagem.texto.startsWith(':sticker:').toString()} */}
+            {mensagem.texto.startsWith(':sticker:')
+              ? (
+                <Image src={mensagem.texto.replace(':sticker:', '')} />
+              )
+              : (
+                mensagem.texto
+              )}
+            {/* if mensagem de texto possui stickers:
+                           mostra a imagem
+                        else 
+                           mensagem.texto */}
+            {/* {mensagem.texto} */}
                     </Text>
                 );
             })}

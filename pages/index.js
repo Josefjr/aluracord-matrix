@@ -1,7 +1,7 @@
 import { Box, Button, Text, TextField, Image } from '@skynexui/components';
 import React from 'react';
 import { useRouter } from 'next/router';
-import appConfig from '../pages/config.json';
+import appConfig from '../config.json';
 
 
 
@@ -77,7 +77,7 @@ export default function PaginaInicial() {
             onSubmit={function (infosDoEvento) {
               infosDoEvento.preventDefault();
               console.log('alguem submeteu o form');
-              roteamento.push('/chat');
+              roteamento.push(`/chat?username=${username}`);
              // window.location.href = '/chat';
             }}
             styleSheet={{
@@ -85,7 +85,7 @@ export default function PaginaInicial() {
               width: { xs: '100%', sm: '50%' }, textAlign: 'center', marginBottom: '32px',
             }}
           >
-            <Titulo tag="h2">Boas vindas de volta!</Titulo>
+            <Titulo tag="h2">Seja Bem Vindo!</Titulo>
             <Text variant="body3" styleSheet={{ marginBottom: '32px', color: appConfig.theme.colors.neutrals[300] }}>
               {appConfig.name}
             </Text>
