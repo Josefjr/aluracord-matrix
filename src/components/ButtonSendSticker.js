@@ -23,13 +23,13 @@ export function ButtonSendSticker(props) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: appConfig.theme.colors.neutrals[300],
+          backgroundColor: appConfig.theme.colors.neutrals[400],
           filter: isOpen ? 'grayscale(0)' : 'grayscale(1)',
           hover: {
             filter: 'grayscale(0)',
           }
         }}
-        label="😋"
+        label="👩‍💻"
         onClick={() => setOpenState(!isOpen)}
       />
       {isOpen && (
@@ -68,7 +68,7 @@ export function ButtonSendSticker(props) {
               justifyContent: 'space-between',
               flex: 1,
               paddingTop: '16px',
-              overflow: 'scroll',
+              overflowY: 'scroll',              
             }}
           >
             {appConfig.stickers.map((sticker) => (
